@@ -1,10 +1,9 @@
 package com.devsuperior.dslearnbds.services.exceptions;
 
-public class ResourceNotFoundException extends RuntimeException{
+public class UnathorizedException extends RuntimeException{
     private static final long serialVersionUID = 1L;
 
-    public ResourceNotFoundException(String msg) {
+    public UnathorizedException(String msg) {
         super(msg);
     }
-
 }
