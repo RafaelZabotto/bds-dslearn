@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
@@ -45,6 +46,9 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
     @Autowired
     private JwtTokenEnhancer jwtTokenEnhancer;
 
+    @Autowired
+    private UserDetailsService userDetailsService;
+
     @Override
     public void configure(AuthorizationServerSecurityConfigurer security) throws Exception {
         security.tokenKeyAccess("permitAll()").checkTokenAccess("isAuthenticated()"); //Padrão
@@ -55,8 +59,9 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
         clients.inMemory().withClient(clientId) //Nome para quando a requisição chegar ao backend, senão não é aceito.
                 .secret(bCryptPasswordEncoder.encode(clientSecret))
                 .scopes("read", "write")    //Permissões
-                .authorizedGrantTypes("password") //Padrão OAuth
-                .accessTokenValiditySeconds(jwtDuration); //tempo de expiração do token em segundos (1 DIA)
+                .authorizedGrantTypes("password", "refresh_token") //Padrão OAuth
+                .accessTokenValiditySeconds(jwtDuration) //tempo de expiração do token em segundos (1 DIA)
+                .refreshTokenValiditySeconds(jwtDuration); //tempo de expiração do refresh_token em segundos (1 DIA)
     }
 
     @Override
@@ -69,6 +74,7 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
         endpoints.authenticationManager(authenticationManager)
                 .tokenStore(jwtTokenStore)
                 .accessTokenConverter(jwtAccessTokenConverter)
-                .tokenEnhancer(tokenEnhancerChain);
+                .tokenEnhancer(tokenEnhancerChain)
+                .userDetailsService(userDetailsService);
     }
 }
